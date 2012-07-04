@@ -14,6 +14,10 @@ destination:
   username: rubyimaptest2@gmail.com
   password: 12345678q
 
+# If set to 'true', all folders will be copied using the same names
+# If set to 'false', the mappings section below will be used
+all_folders: false
+
 # Mapping of source folders to destination folders. The key is the name of the folder on the source server, the value
 # is the name on the destination server. Any folder not specified here will be ignored. If a destination folder does
 # not exist, it will be created.

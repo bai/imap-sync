@@ -33,21 +33,7 @@ def uid_fetch_block(server, uids, *args)
   end
 end
 
-# Connect and log into both servers.
-ds 'connecting...'
-source = Net::IMAP.new(C['source']['host'], C['source']['port'], C['source']['ssl'])
-
-ds 'logging in...'
-source.login(C['source']['username'], C['source']['password'])
-
-dd 'connecting...'
-dest = Net::IMAP.new(C['destination']['host'], C['destination']['port'], C['destination']['ssl'])
-
-dd 'logging in...'
-dest.login(C['destination']['username'], C['destination']['password'])
-
-# Loop through folders and copy messages.
-C['mappings'].each do |source_folder, dest_folder|
+def compare_folders(source, dest, source_folder, dest_folder)
   # Open source folder in read-only mode.
   begin
     ds "selecting folder '#{source_folder}'..."
@@ -113,4 +99,38 @@ C['mappings'].each do |source_folder, dest_folder|
 
   source.close
   dest.close
+end
+
+
+
+# MAIN
+
+# Connect and log into both servers.
+ds 'connecting...'
+source = Net::IMAP.new(C['source']['host'], C['source']['port'], C['source']['ssl'])
+
+ds 'logging in...'
+source.login(C['source']['username'], C['source']['password'])
+
+dd 'connecting...'
+dest = Net::IMAP.new(C['destination']['host'], C['destination']['port'], C['destination']['ssl'])
+
+dd 'logging in...'
+dest.login(C['destination']['username'], C['destination']['password'])
+
+
+# Loop through folders and copy messages.
+if C["all_folders"]
+  ds "Processing all source folders"
+
+  folders = source.list("", "*")
+  folders.each do |f|
+    compare_folders(source, dest, f.name, f.name)
+  end
+else
+  ds "Processing source folder list from configuration"
+
+  C['mappings'].each do |source_folder, dest_folder|
+    compare_folders(source, dest, source_folder, dest_folder)
+  end
 end
